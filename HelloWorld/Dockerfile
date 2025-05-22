@@ -1,17 +1,22 @@
-# Goプログラムのビルド
-FROM golang:1.21 AS builder
+# ビルドステージ
+# Goのソースコードをコンパイルするための環境を準備
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
+# main.goをコンテナの/appにコピーする
 COPY main.go .
 
-RUN go build -ldflags="-s -w" -o hello main.go
+# 実行ファイルを作る
+RUN go build -ldflags="-s -w" -o helloworld main.go
 
-# 実行用の軽量イメージ
-FROM debian:bookworm-slim
+# 実行ステージ
+FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/hello .
+# ビルドステージで作成した/app/helloworldをコピーする
+COPY --from=builder /app/helloworld .
 
-CMD ["./hello"]
+# コンテナが起動されたとき./helloworldを実行する
+CMD ["./helloworld"]
